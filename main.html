@@ -1,85 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Text-to-Speech Application</title>
+  <title>Speech Synthesis</title>
+  <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Text-to-Speech Application</h1>
-  <div>
-    <label for="voices">Select Voice:</label>
-    <select id="voices"></select>
-  </div>
-  <div>
-    <label for="rate">Rate:</label>
-    <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1">
-  </div>
-  <div>
-    <label for="pitch">Pitch:</label>
-    <input type="range" id="pitch" min="0" max="2" step="0.1" value="1">
-  </div>
-  <div>
-    <textarea id="text" rows="5" cols="50"></textarea>
-  </div>
-  <div>
-    <button id="startBtn">Start</button>
-    <button id="stopBtn">Stop</button>
-  </div>
 
-  <script>
-    // Get references to the HTML elements
-    const voicesDropdown = document.getElementById('voices');
-    const rateSlider = document.getElementById('rate');
-    const pitchSlider = document.getElementById('pitch');
-    const textInput = document.getElementById('text');
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
+    <div class="voiceinator">
 
-    // Initialize the speech synthesis
-    const synth = window.speechSynthesis;
+      <h1>The Voiceinator 5000</h1>
 
-    // Populate the voices dropdown with available voices
-    function populateVoices() {
-      const voices = synth.getVoices();
+      <select name="voice" id="voices">
+        <option value="">Select A Voice</option>
+      </select>
 
-      voicesDropdown.innerHTML = voices
-        .map(voice => `<option value="${voice.name}">${voice.name}</option>`)
-        .join('');
-    }
+      <label for="rate">Rate:</label>
+      <input name="rate" type="range" min="0" max="3" value="1" step="0.1">
 
-    // Event listener for when voices are loaded
-    synth.addEventListener('voiceschanged', populateVoices);
+      <label for="pitch">Pitch:</label>
 
-    // Event listener for the start button
-    startBtn.addEventListener('click', () => {
-      // Check if speech synthesis is already speaking
-      if (synth.speaking) {
-        console.error('Speech synthesis is already in progress.');
-        return;
-      }
+      <input name="pitch" type="range" min="0" max="2" step="0.1">
+      <textarea name="text">Hello! I love JavaScript 👍</textarea>
+      <button id="stop">Stop!</button>
+      <button id="speak">Speak</button>
 
-      // Create a new speech synthesis utterance
-      const utterance = new SpeechSynthesisUtterance(textInput.value);
+    </div>
 
-      // Set the selected voice
-      const selectedVoice = voicesDropdown.value;
-      const voices = synth.getVoices();
-      const voice = voices.find(v => v.name === selectedVoice);
-      utterance.voice = voice;
+<script>
+  const msg = new SpeechSynthesisUtterance();
+  let voices = [];
+  const voicesDropdown = document.querySelector('[name="voice"]');
+  const options = document.querySelectorAll('[type="range"], [name="text"]');
+  const speakButton = document.querySelector('#speak');
+  const stopButton = document.querySelector('#stop');
 
-      // Set the rate and pitch
-      utterance.rate = rateSlider.value;
-      utterance.pitch = pitchSlider.value;
+  //Your code goes here
+	 // Populate the voices dropdown with available voices
+  function populateVoices() {
+    voices = speechSynthesis.getVoices();
+    voicesDropdown.innerHTML = voices
+      .map(voice => `<option value="${voice.name}">${voice.name} (${voice.lang})</option>`)
+      .join('');
+  }
 
-      // Start speaking
-      synth.speak(utterance);
-    });
+  // Set the selected voice
+  function setVoice() {
+    const selectedVoice = voicesDropdown.value;
+    const voice = voices.find(v => v.name === selectedVoice);
+    msg.voice = voice;
+  }
 
-    // Event listener for the stop button
-    stopBtn.addEventListener('click', () => {
-      // Stop speaking
-      synth.cancel();
-    });
-  </script>
+  // Set the rate and pitch
+  function setOptions() {
+    msg.rate = parseFloat(document.querySelector('[name="rate"]').value);
+    msg.pitch = parseFloat(document.querySelector('[name="pitch"]').value);
+  }
+
+  // Start speaking
+  function speakText() {
+    speechSynthesis.cancel();
+    setVoice();
+    setOptions();
+    msg.text = document.querySelector('[name="text"]').value;
+    speechSynthesis.speak(msg);
+  }
+
+  // Stop speaking
+  function stopText() {
+    speechSynthesis.cancel();
+  }
+
+  // Event listeners
+  speechSynthesis.addEventListener('voiceschanged', populateVoices);
+  voicesDropdown.addEventListener('change', setVoice);
+  options.forEach(option => option.addEventListener('change', setOptions));
+  speakButton.addEventListener('click', speakText);
+  stopButton.addEventListener('click', stopText);
+</script>
+
 </body>
 </html>
